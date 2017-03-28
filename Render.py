@@ -17,9 +17,16 @@ songListTable=driver.find_element_by_class_name("j-flag").get_attribute("innerHT
 bsFile=BeautifulSoup(songListTable,"html.parser")
 #print(bsFile.prettify())
 trs=bsFile.find_all("tr")
+
 for index,tr in enumerate(trs):
     print("---"+str(index)+"---")
-    print(tr)
+    #print(tr)
+    tds=tr.find_all("td")
+    if(len(tds)>0):
+        print("***TITLE***"+tds[1].text)
+        print("***LENGTH***"+tds[2].text)
+        print("***ARTIEST***"+tds[3].text)
+        print("***ALBUM***"+tds[4].text)
     print("------")
 
 
