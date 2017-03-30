@@ -1,8 +1,10 @@
 from selenium import webdriver
 from bs4 import BeautifulSoup
 import time
+from Song import Song
 
 url="http://music.163.com/#/playlist?id=23348698&userid=32116377"
+#url="http://music.163.com/#/m/playlist?id=125879190"
 
 driver = webdriver.Chrome()
 driver.get(url)
@@ -18,16 +20,22 @@ bsFile=BeautifulSoup(songListTable,"html.parser")
 #get all rows , each is one song
 trs=bsFile.find_all("tr")
 
+songList=[]
 for index,tr in enumerate(trs):
-    print("---"+str(index)+"---")
-    #print(tr)
     tds=tr.find_all("td")
     if(len(tds)>0):
-        print("***TITLE***"+tds[1].text.replace("MV",""))
-        print("***LENGTH***"+tds[2].text.replace("分享",""))
-        print("***ARTIEST***"+tds[3].text)
-        print("***ALBUM***"+tds[4].text)
-    print("------")
+        name=tds[1].text.replace("MV","")
+        length=tds[2].text.replace("分享","")
+        singer=tds[3].text
+        album=tds[4].text
+
+        songList.append(Song(name=name,length=length,singer=singer,album=album))
+
+driver.quit()
+
+for songIndex,song in enumerate(songList):
+    print("---"+str(songIndex+1)+"---")
+    print(song)
 
 
 
