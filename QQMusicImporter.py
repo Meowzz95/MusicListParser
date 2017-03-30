@@ -13,7 +13,7 @@ class Importer(object):
 
     def start(self):
         for song in self.songList:
-            link=self.parse_link(song.name)
+            link=self.parse_link(song)
             skipped=self.favorite(link)
             if skipped:
                 print("[SKIPPED]"+song.name)
@@ -22,8 +22,8 @@ class Importer(object):
         self.driver.quit()
 
 
-    def parse_link(self,name):
-        url=self.searchUrl+name
+    def parse_link(self,song):
+        url=self.searchUrl+song.name+" "+song.singer
         self.driver.get(url)
         time.sleep(2)
         searchResultTableHtml = self.driver.find_element_by_id("song_box").get_attribute("outerHTML")
@@ -50,7 +50,8 @@ class Importer(object):
         if skipExist:
             if "已收藏" in elementFavorite.text:
                 skipped=True
-        else:
+
+        if not skipped:
             elementFavorite.click()
 
         time.sleep(1)

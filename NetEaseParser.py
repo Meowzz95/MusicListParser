@@ -2,6 +2,7 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 import time
 from Song import Song
+from QQMusicImporter import Importer
 
 url="http://music.163.com/#/playlist?id=23348698&userid=32116377"
 #url="http://music.163.com/#/m/playlist?id=125879190"
@@ -37,6 +38,9 @@ for songIndex,song in enumerate(songList):
     print("---"+str(songIndex+1)+"---")
     print(song)
 
+
+importer=Importer(songList)
+importer.start()
 
 
 
