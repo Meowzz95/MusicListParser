@@ -1,63 +1,85 @@
 import time
 from selenium import webdriver
 from bs4 import BeautifulSoup
+from selenium.common.exceptions import NoSuchWindowException
+
 
 class Importer(object):
     searchUrl = "https://y.qq.com/portal/search.html?w="
-    songList=[]
-    def __init__(self,songList):
-        self.songList=songList
+    songList = []
+
+    def __init__(self, songList):
+        self.songList = songList
         options = webdriver.ChromeOptions()
         options.add_argument("user-data-dir=C:\\Users\\jjzzz\\AppData\\Local\\Google\\Chrome\\User Data\\Default")
         self.driver = webdriver.Chrome(chrome_options=options)
 
     def start(self):
+        failList=[]
+        successCount=0
         for song in self.songList:
-            link=self.parse_link(song)
-            skipped=self.favorite(link)
+            link = self.parse_link(song)
+            skipped,info = self.favorite(link)
             if skipped:
-                print("[SKIPPED]"+song.name)
+                print("[SKIPPED]" + song.name)
+                if info:
+                    print("  [Reason]"+info)
+                    failList.append(song)
+
             else:
-                print("[ADDED]"+song.name)
+                print("[ADDED]" + song.name)
+                successCount+=1
+
+        print(failList,sep="\n")
+        print("---FINISH---")
+        print("Total processed:"+str(len(self.songList)))
+        print("Success:"+str(successCount))
+        print("Failure:"+str(len(failList)))
+        print("Failure list is shown above")
         self.driver.quit()
 
-
-    def parse_link(self,song):
-        url=self.searchUrl+song.name+" "+song.singer
+    def parse_link(self, song):
+        url = self.searchUrl + song.name + " " + song.singer
         self.driver.get(url)
-        time.sleep(2)
-        searchResultTableHtml = self.driver.find_element_by_id("song_box").get_attribute("outerHTML")
+        while True:
+            time.sleep(2)
+            searchResultTableHtml = self.driver.find_element_by_id("song_box").get_attribute("outerHTML")
 
-        bs = BeautifulSoup(searchResultTableHtml, "html.parser")
-        # the UL containing all the search results, there should be only one UL found
-        songListUls = bs.find_all("ul", attrs={"class": "songlist__list"})
-        # each li represents one song
-        songLis = songListUls[0].find_all("li")
-        # take first one and get the song page url
-        songAs = songLis[0].find_all("a")
-        songLink = songAs[0].get('href')
+            bs = BeautifulSoup(searchResultTableHtml, "html.parser")
+            # the UL containing all the search results, there should be only one UL found
+            songListUls = bs.find_all("ul", attrs={"class": "songlist__list"})
+            if len(songListUls)==0:
+                print("[ERROR] $"+song.name+"$ Result list not found(may due to low network speed), try again...")
+                continue
+            # each li represents one song
+            songLis = songListUls[0].find_all("li")
+            # take first one and get the song page url
+            songAs = songLis[0].find_all("a")
+            songLink = songAs[0].get('href')
+            break
 
         return songLink
 
-    def favorite(self, link,skipExist=True):
+    def favorite(self, link, skipExist=True):
+        info=None
         # open another page to get song details
         self.driver.get(link)
         time.sleep(2)
-        elementFavorite=self.driver.find_element_by_css_selector("a.mod_btn.js_all_like")
+        try:
+            elementFavorite = self.driver.find_element_by_css_selector("a.mod_btn.js_all_like")
+        except:
+            # if the page does not contain the favorite button, return true(meaning this song is skipped)
+            info="Fail to find favorite button, skipping..."
+            return True,info
 
-        skipped=False
+        skipped = False
 
         if skipExist:
             if "已收藏" in elementFavorite.text:
-                skipped=True
+                skipped = True
 
         if not skipped:
             elementFavorite.click()
 
         time.sleep(1)
-        return skipped
-
-
-
-
-
+        return skipped,info

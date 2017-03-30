@@ -38,7 +38,7 @@ for songIndex,song in enumerate(songList):
     print("---"+str(songIndex+1)+"---")
     print(song)
 
-
+songList.reverse()
 importer=Importer(songList)
 importer.start()
 

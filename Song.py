@@ -4,7 +4,7 @@ class Song:
     length=""
     album=""
 
-    def __init__(self,name=None,singer=None,length=None,album=None):
+    def __init__(self,name=None,singer="",length="",album=""):
         self.name=name
         self.singer=singer
         self.length=length
