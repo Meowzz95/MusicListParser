@@ -17,6 +17,7 @@ class Importer(object):
     def start(self):
         failList = []
         successCount = 0
+        skipCount=0
         for song in self.songList:
             link = self.parse_link(song)
             skipped, info = self.favorite(link)
@@ -25,15 +26,18 @@ class Importer(object):
                 if info:
                     print("  [Reason]" + info)
                     failList.append(song)
+                else:
+                    skipCount+=1
 
             else:
                 print("[ADDED]" + song.name)
                 successCount += 1
 
-        print(failList, sep="\n")
+        print(failList)
         print("---FINISH---")
         print("Total processed:" + str(len(self.songList)))
         print("Success:" + str(successCount))
+        print("Skip:"+str(skipCount))
         print("Failure:" + str(len(failList)))
         print("Failure list is shown above")
         self.driver.quit()
