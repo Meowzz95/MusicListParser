@@ -1,28 +1,29 @@
 import time
 from selenium import webdriver
 from bs4 import BeautifulSoup
+from urllib import parse
 from selenium.common.exceptions import NoSuchWindowException
 
 
 class Importer(object):
-    searchUrl = "https://y.qq.com/portal/search.html?w="
+    searchUrl = "https://y.qq.com/portal/search.html?"
     songList = []
 
     def __init__(self, songList):
         self.songList = songList
         options = webdriver.ChromeOptions()
         options.add_argument("user-data-dir=C:\\Users\\jjzzz\\AppData\\Local\\Google\\Chrome\\User Data\\Default")
-        self.driver = webdriver.Chrome(chrome_options=options)
+        self.driver = webdriver.Chrome(chrome_options=options,executable_path="C:\chromedriver.exe")
 
     def start(self):
         failList = []
         successCount = 0
         skipCount=0
-        for song in self.songList:
+        for index,song in enumerate(self.songList):
             link = self.parse_link(song)
             skipped, info = self.favorite(link)
             if skipped:
-                print("[SKIPPED]" + song.name)
+                print(str(index)+"[SKIPPED]" + song.name)
                 if info:
                     print("  [Reason]" + info)
                     failList.append(song)
@@ -30,7 +31,7 @@ class Importer(object):
                     skipCount+=1
 
             else:
-                print("[ADDED]" + song.name)
+                print(str(index)+"[ADDED]" + song.name)
                 successCount += 1
 
         print(failList)
@@ -43,7 +44,10 @@ class Importer(object):
         self.driver.quit()
 
     def parse_link(self, song):
-        url = self.searchUrl + song.name + " " + song.singer
+
+        paramsDict={"w":song.name+" "+song.singer}
+        #single quoto in search url will make the thing crazy
+        url = self.searchUrl + parse.urlencode(paramsDict,quote_via=parse.quote_plus).replace("%27","")
         self.driver.get(url)
         # initialize songLink as a invalid result page
         # so if no result is found, the invalid page will be redirected to

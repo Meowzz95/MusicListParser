@@ -7,7 +7,7 @@ from QQMusicImporter import Importer
 url="http://music.163.com/#/playlist?id=23348698&userid=32116377"
 #url="http://music.163.com/#/m/playlist?id=125879190"
 
-driver = webdriver.Chrome()
+driver = webdriver.Chrome(executable_path="C:\chromedriver.exe")
 driver.get(url)
 time.sleep(3)
 #must switch to the i frame which contains the song list table
@@ -38,7 +38,7 @@ for songIndex,song in enumerate(songList):
     print("---"+str(songIndex+1)+"---")
     print(song)
 
-songList.reverse()
+#songList.reverse()
 importer=Importer(songList)
 importer.start()
 
